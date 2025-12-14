@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DepCom | Streaming & Media</title>
+    <!-- Iconos Material Design -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Fuente Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- RESET Y VARIABLES (PALETA AZUL REY) --- */
+        :root {
+            --primary: #2962ff; 
+            --primary-dark: #0039cb;
+            --bg-dark: #050505;
+            --card-bg: rgba(20, 20, 20, 0.7);
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-sec: #b0b0b0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            padding-bottom: 90px;
+        }
+
+        /* --- FONDO ANIMADO --- */
+        .background-fx {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
+            background: radial-gradient(circle at 50% 100%, #0d47a1, #002171 40%, #000000 90%);
+            animation: breathe 8s ease-in-out infinite alternate;
+        }
+        @keyframes breathe { 0% { opacity: 0.7; } 100% { opacity: 1; } }
+
+        /* --- HEADER --- */
+        header {
+            padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 50;
+            backdrop-filter: blur(15px);
+            background: rgba(0,0,0,0.6);
+            border-bottom: 1px solid var(--border);
+        }
+        .logo { font-weight: 800; font-size: 1.5rem; color: #fff; letter-spacing: 1px; }
+        .logo span { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+
+        /* --- HERO Y BÚSQUEDA --- */
+        .hero { padding: 25px 20px 10px; }
+        .hero h1 { font-size: 2rem; line-height: 1.1; margin-bottom: 20px; }
+        .hero span { color: var(--primary); text-shadow: 0 0 15px rgba(41, 98, 255, 0.6); }
+
+        .search-box {
+            background: var(--glass);
+            border-radius: 30px;
+            padding: 12px 20px;
+            display: flex; align-items: center;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+        .search-box:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(41, 98, 255, 0.3);
+        }
+        .search-box input {
+            background: transparent; border: none; color: white; width: 100%;
+            margin-left: 10px; outline: none; font-family: inherit; font-size: 1rem;
+        }
+
+        /* --- CATEGORÍAS --- */
+        .categories {
+            display: flex; overflow-x: auto; gap: 10px; padding: 0 20px 20px;
+            scrollbar-width: none;
+        }
+        .categories::-webkit-scrollbar { display: none; }
+        
+        .cat-btn {
+            background: var(--glass); color: #fff;
+            border: 1px solid var(--border);
+            padding: 8px 18px; border-radius: 20px;
+            white-space: nowrap; cursor: pointer; transition: 0.3s;
+            font-size: 0.9rem; font-weight: 600;
+        }
+        .cat-btn.active, .cat-btn:hover {
+            background: var(--primary); border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(41, 98, 255, 0.5);
+        }
+
+        /* --- GRID DE VIDEOS --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 0 20px;
+            perspective: 1000px;
+        }
+
+        /* --- TARJETAS 3D --- */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            height: 320px;
+            border: 1px solid var(--border);
+            transition: transform 0.1s ease-out, box-shadow 0.3s;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            display: flex; flex-direction: column; justify-content: flex-end;
+        }
+
+        .card:hover {
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+            border-color: var(--primary);
+            z-index: 10;
+        }
+
+        .card-img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; transition: 0.5s; opacity: 0.8; z-index: -1;
+            filter: grayscale(20%);
+        }
+        .card:hover .card-img { transform: scale(1.1); opacity: 0.5; filter: grayscale(0%); }
+
+        .card-content {
+            padding: 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
+            transform: translateZ(20px);
+        }
+
+        .card-cat { color: var(--primary); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 5px rgba(41, 98, 255, 0.5); }
+        .card-title { font-size: 1.2rem; font-weight: 700; margin: 5px 0; line-height: 1.2; }
+        .card-desc { font-size: 0.8rem; color: var(--text-sec); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .play-btn-overlay {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) translateZ(40px) scale(0.8);
+            background: rgba(41, 98, 255, 0.9);
+            width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: 0.3s;
+            box-shadow: 0 0 20px var(--primary);
+        }
+        .card:hover .play-btn-overlay { opacity: 1; transform: translate(-50%, -50%) translateZ(40px) scale(1); }
+
+        /* --- SECCIÓN SOBRE NOSOTROS --- */
+        .about-section {
+            margin: 40px 20px;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(41, 98, 255, 0.05));
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .about-section h2 { color: var(--primary); margin-bottom: 15px; }
+        .about-section p { color: var(--text-sec); line-height: 1.6; font-size: 0.95rem; max-width: 800px; margin: 0 auto; }
+        
+        .producers {
+            display: flex; justify-content: center; gap: 20px; margin-top: 20px; flex-wrap: wrap;
+        }
+        .producer-badge {
+            background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 15px; border: 1px solid var(--primary);
+            font-size: 0.8rem; color: #fff; box-shadow: 0 0 10px rgba(41, 98, 255, 0.2);
+        }
+
+        /* --- FOOTER REDES SOCIALES --- */
+        .footer-social {
+            text-align: center; padding: 20px; margin-bottom: 20px;
+            border-top: 1px solid var(--border);
+            background: #020202;
+        }
+        .social-icons { display: flex; justify-content: center; gap: 25px; margin-top: 15px; }
+        .social-link { color: #fff; transition: 0.3s; }
+        .social-link:hover { color: var(--primary); transform: scale(1.2); text-shadow: 0 0 10px var(--primary); }
+
+        /* --- NAV FLOTANTE INFERIOR --- */
+        .floating-nav {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(5, 5, 5, 0.95); backdrop-filter: blur(20px);
+            padding: 12px 30px; border-radius: 40px;
+            display: flex; gap: 35px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9); z-index: 90;
+        }
+        .nav-item { color: #555; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+        .nav-item.active { color: var(--primary); text-shadow: 0 0 15px var(--primary); }
+        .nav-item i { font-size: 28px; }
+
+        /* --- DRAWER MENU --- */
+        .drawer {
+            position: fixed; top: 0; right: -100%; width: 280px; height: 100%;
+            background: #0a0a0a; z-index: 200;
+            transition: 0.4s cubic-bezier(0.7, 0, 0.3, 1);
+            padding: 30px; border-left: 1px solid var(--primary);
+            box-shadow: -10px 0 50px rgba(0,0,0,0.8);
+        }
+        .drawer.open { right: 0; }
+        .drawer h3 { color: var(--primary); margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .drawer a { display: block; color: #fff; text-decoration: none; font-size: 1.1rem; margin-bottom: 20px; transition: 0.2s; }
+        .drawer a:hover { color: var(--primary); padding-left: 10px; text-shadow: 0 0 8px var(--primary); }
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 199;
+            opacity: 0; visibility: hidden; transition: 0.3s;
+        }
+        .overlay.open { opacity: 1; visibility: visible; }
+
+        /* --- VIDEO PLAYER MODAL --- */
+        .player-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 300;
+            display: flex; flex-direction: column;
+            transform: translateY(100%); transition: transform 0.4s ease-in-out;
+        }
+        .player-modal.active { transform: translateY(0); }
+
+        .video-container {
+            flex: 1; background: #000; position: relative;
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        .player-info { padding: 25px; background: #080808; border-top: 1px solid var(--primary-dark); }
+        .player-info h2 { font-size: 1.5rem; margin-bottom: 10px; color: #fff; }
+        .player-info p { color: var(--text-sec); font-size: 0.9rem; line-height: 1.5; }
+
+        .controls-top {
+            position: absolute; top: 0; left: 0; width: 100%; padding: 20px;
+            display: flex; justify-content: space-between; z-index: 10;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+        }
+
+        /* Iframe y Video Full */
+        .video-container iframe, .video-container video { width: 100%; height: 100%; border: none; }
+        
+    </style>
+</head>
+<body>
+
+    <!-- Fondo Animado (Azul) -->
+    <div class="background-fx"></div>
+
+    <!-- Menú Drawer Lateral -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+    <div class="drawer" id="drawer">
+        <h3>DEPCOM MENU</h3>
+        <a href="#">Inicio</a>
+        <a href="#">Cortometrajes</a>
+        <a href="#">Programas en vivo</a>
+        <a href="#">Documentales</a>
+        <a href="#">Perfil de Usuario</a>
+        <a href="#" style="margin-top: 50px; color: #666;">Cerrar Sesión</a>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">DEP<span>COM</span></div>
+        <i class="material-icons" style="font-size: 30px; color: #fff; cursor: pointer;" onclick="toggleMenu()">menu</i>
+    </header>
+
+    <!-- Contenido Principal -->
+    <div class="hero">
+        <div class="search-box">
+            <i class="material-icons" style="color: var(--primary);">search</i>
+            <input type="text" id="searchInput" placeholder="Buscar contenido..." onkeyup="filterSearch()">
+        </div>
+        <h1>Descubre tus <br><span>Historias</span></h1>
+    </div>
+
+    <!-- Filtros -->
+    <div class="categories" id="filters">
+        <button class="cat-btn active" onclick="filterCategory('Todos', this)">Todos</button>
+        <button class="cat-btn" onclick="filterCategory('Cortometraje', this)">Cortometrajes</button>
+        <button class="cat-btn" onclick="filterCategory('Radio', this)">Radio</button>
+        <button class="cat-btn" onclick="filterCategory('Documental', this)">Documentales</button>
+        <button class="cat-btn" onclick="filterCategory('Programa', this)">Programas</button>
+    </div>
+
+    <!-- Grid de Videos (JS lo llena) -->
+    <div class="grid" id="contentGrid"></div>
+
+    <!-- Sección Sobre Nosotros -->
+    <section class="about-section">
+        <h2>Nosotros</h2>
+        <p>DepCom es una plataforma independiente dedicada a la difusión de cultura audiovisual, radiofónica y documental. Creada por apasionados del arte digital para conectar historias con el mundo.</p>
+        <div class="producers">
+            <div class="producer-badge">Prod. Carlos M.</div>
+            <div class="producer-badge">Dir. Ana R.</div>
+            <div class="producer-badge">Edición: Team DepCom</div>
+        </div>
+    </section>
+
+    <!-- Footer Redes Sociales -->
+    <footer class="footer-social">
+        <p style="color: #666; font-size: 0.8rem;">Síguenos en nuestras redes</p>
+        <div class="social-icons">
+            <a href="#" class="social-link"><i class="material-icons">facebook</i></a>
+            <a href="#" class="social-link"><i class="material-icons">camera_alt</i></a>
+            <a href="#" class="social-link"><i class="material-icons">alternate_email</i></a>
+            <a href="#" class="social-link"><i class="material-icons">smart_display</i></a>
+        </div>
+        <p style="color: #444; font-size: 0.7rem; margin-top: 20px;">© 2024 DepCom App. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Menú Flotante -->
+    <div class="floating-nav">
+        <div class="nav-item active"><i class="material-icons">home</i></div>
+        <div class="nav-item"><i class="material-icons">play_circle</i></div>
+        <div class="nav-item"><i class="material-icons">favorite</i></div>
+        <div class="nav-item"><i class="material-icons">person</i></div>
+    </div>
+
+    <!-- REPRODUCTOR DE VIDEO (MODAL) -->
+    <div class="player-modal" id="playerModal">
+        <div class="controls-top">
+            <i class="material-icons" style="color:white; font-size:30px; cursor:pointer;" onclick="closePlayer()">keyboard_arrow_down</i>
+            <span style="color:var(--primary); font-weight:bold;">Reproduciendo</span>
+        </div>
+
+        <div class="video-container" id="videoContainer">
+            <!-- AQUÍ SE INYECTA EL VIDEO CON JAVASCRIPT -->
+        </div>
+
+        <div class="player-info">
+            <h2 id="modalTitle">Título del Video</h2>
+            <span id="modalCat" style="color:var(--primary); font-size:0.8rem; text-transform:uppercase; font-weight:bold;">Categoría</span>
+            <p id="modalDesc" style="margin-top: 15px;">Descripción...</p>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================
+        // --- AQUÍ COLOCAS TUS VIDEOS (BASE DE DATOS) ---
+        // =========================================================
+        const data = [
+            { 
+                id: 1, 
+                title: "Tráiler Cinematic", 
+                cat: "Cortometraje", 
+                img: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80",
+                desc: "Un ejemplo de cortometraje cargado desde YouTube. Observa cómo la historia se desarrolla en un mundo futurista.",
+                // USA 'embed' EN LUGAR DE 'watch' PARA YOUTUBE
+                videoUrl: "https://www.youtube.com/embed/LXb3EKWsInQ", 
+                type: "youtube"
+            },
+            { 
+                id: 2, 
+                title: "Documental Naturaleza", 
+                cat: "Documental", 
+                img: "https://images.unsplash.com/photo-1504198266287-1659872e6590?auto=format&fit=crop&w=600&q=80",
+                desc: "Explorando la vida salvaje. Este video es un ejemplo de contenido educativo.",
+                videoUrl: "https://www.youtube.com/embed/9b166U494rM", 
+                type: "youtube"
+            },
+            { 
+                id: 3, 
+                title: "Video Local (Demo)", 
+                cat: "Programa", 
+                img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80",
+                desc: "Así se vería si subes un archivo MP4 en tu carpeta. (Este ejemplo fallará si no tienes el archivo real, pero la lógica está lista).",
+                videoUrl: "videos/mi-programa.mp4", 
+                type: "mp4"
+            },
+            { 
+                id: 4, 
+                title: "Radio Nocturna", 
+                cat: "Radio", 
+                img: "https://images.unsplash.com/photo-1478737270239-2f02b77ac618?auto=format&fit=crop&w=600&q=80",
+                desc: "Transmisión en vivo de las mejores historias de terror de la radio.",
+                videoUrl: "https://www.youtube.com/embed/jfKfPfyJRdk", // Lofi radio example
+                type: "youtube"
+            },
+        ];
+
+        // --- RENDERIZADO DE TARJETAS ---
+        const grid = document.getElementById('contentGrid');
+        
+        function renderCards(items) {
+            grid.innerHTML = '';
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => openPlayer(item);
+                
+                // Efecto 3D
+                card.addEventListener('mousemove', (e) => handleTilt(e, card));
+                card.addEventListener('mouseleave', () => resetTilt(card));
+
+                card.innerHTML = `
+                    <img src="${item.img}" class="card-img" alt="${item.title}">
+                    <div class="play-btn-overlay"><i class="material-icons" style="color:white;">play_arrow</i></div>
+                    <div class="card-content">
+                        <div class="card-cat">${item.cat}</div>
+                        <div class="card-title">${item.title}</div>
+                        <div class="card-desc">${item.desc}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        renderCards(data);
+
+        // --- LÓGICA DE REPRODUCTOR (VIDEO REAL) ---
+        function openPlayer(item) {
+            // 1. Poner Textos
+            document.getElementById('modalTitle').innerText = item.title;
+            document.getElementById('modalCat').innerText = item.cat;
+            document.getElementById('modalDesc').innerText = item.desc;
+            
+            // 2. Insertar Video
+            const container = document.getElementById('videoContainer');
+            container.innerHTML = ''; // Limpiar anterior
+
+            if (item.type === 'youtube') {
+                // Iframe YouTube con Autoplay
+                container.innerHTML = `
+                    <iframe src="${item.videoUrl}?autoplay=1&modestbranding=1&rel=0" 
+                        title="YouTube video player" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>`;
+            } else if (item.type === 'mp4') {
+                // Etiqueta Video HTML5
+                container.innerHTML = `
+                    <video controls autoplay playsinline style="width:100%; height:100%; object-fit:contain;">
+                        <source src="${item.videoUrl}" type="video/mp4">
+                        Tu navegador no soporta video HTML5.
+                    </video>`;
+            }
+
+            // 3. Botón Pantalla Completa
+            const fsBtn = document.createElement('div');
+            fsBtn.style = "position: absolute; bottom: 20px; right: 20px; cursor: pointer; z-index:20; background:rgba(0,0,0,0.5); padding:5px; border-radius:50%;";
+            fsBtn.innerHTML = '<i class="material-icons" style="color: white; font-size: 30px;">fullscreen</i>';
+            fsBtn.onclick = toggleFullScreen;
+            container.appendChild(fsBtn);
+
+            // 4. Mostrar Modal
+            document.getElementById('playerModal').classList.add('active');
+        }
+
+        function closePlayer() {
+            document.getElementById('playerModal').classList.remove('active');
+            // Importante: Vaciar el contenedor para detener el sonido
+            document.getElementById('videoContainer').innerHTML = '';
+            
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+        }
+
+        // --- OTRAS FUNCIONES (Filtros, UI, 3D) ---
+        
+        function filterCategory(category, btn) {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if(category === 'Todos') renderCards(data);
+            else renderCards(data.filter(i => i.cat === category));
+        }
+
+        function filterSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            renderCards(data.filter(i => i.title.toLowerCase().includes(query) || i.desc.toLowerCase().includes(query)));
+        }
+
+        function toggleMenu() {
+            document.getElementById('drawer').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('open');
+        }
+
+        function toggleFullScreen() {
+            const container = document.getElementById('videoContainer');
+            if (!document.fullscreenElement) {
+                if(container.requestFullscreen) container.requestFullscreen();
+                else if(container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+            } else {
+                if(document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        function handleTilt(e, card) {
+            if(window.innerWidth < 768) return;
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const rotateX = ((y - centerY) / centerY) * -8;
+            const rotateY = ((x - centerX) / centerX) * 8;
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+        }
+
+        function resetTilt(card) {
+            card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)`;
+        }
+
+    </script>
+</body>
+</html>
